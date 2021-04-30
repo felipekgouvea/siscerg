@@ -1,5 +1,6 @@
 package br.com.cerg.siscerg;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,20 @@ import br.com.cerg.siscerg.entities.Cidade;
 import br.com.cerg.siscerg.entities.Cliente;
 import br.com.cerg.siscerg.entities.Endereco;
 import br.com.cerg.siscerg.entities.Estado;
+import br.com.cerg.siscerg.entities.Pagamento;
+import br.com.cerg.siscerg.entities.PagamentoComBoleto;
+import br.com.cerg.siscerg.entities.PagamentoComCartao;
+import br.com.cerg.siscerg.entities.Pedido;
 import br.com.cerg.siscerg.entities.Produto;
+import br.com.cerg.siscerg.entities.enums.EstadoPagamento;
 import br.com.cerg.siscerg.entities.enums.TipoCliente;
 import br.com.cerg.siscerg.repositories.CategoriaRepository;
 import br.com.cerg.siscerg.repositories.CidadeRepository;
 import br.com.cerg.siscerg.repositories.ClienteRepository;
 import br.com.cerg.siscerg.repositories.EnderecoRepository;
 import br.com.cerg.siscerg.repositories.EstadoRepository;
+import br.com.cerg.siscerg.repositories.PagamentoRepository;
+import br.com.cerg.siscerg.repositories.PedidoRepository;
 import br.com.cerg.siscerg.repositories.ProdutoRepository;
 
 @SpringBootApplication
@@ -36,6 +44,10 @@ public class SiscergApplication implements CommandLineRunner{
 	private ClienteRepository clienteRepository;
 	@Autowired
 	private EnderecoRepository enderecoRepository;
+	@Autowired
+	private PagamentoRepository pagamentoRepository;
+	@Autowired
+	private PedidoRepository pedidoRepository;
 	
 	public static void main(String[] args) {
 		SpringApplication.run(SiscergApplication.class, args);
@@ -88,5 +100,25 @@ public class SiscergApplication implements CommandLineRunner{
 		
 		clienteRepository.saveAll(Arrays.asList(cli1,cli2,cli3));
 		enderecoRepository.saveAll(Arrays.asList(end1,end2,end3));
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		
+		Pedido ped1 = new Pedido(null, sdf.parse("30/04/2021 19:10"), cli1, end1);
+		Pedido ped2 = new Pedido(null, sdf.parse("01/01/2021 01:10"), cli3, end3);
+		Pedido ped3 = new Pedido(null, sdf.parse("25/12/2020 20:00"), cli1, end1);
+		
+		Pagamento pgto1 = new PagamentoComCartao(null, EstadoPagamento.QUITADO, ped1, 10);
+		ped1.setPagamento(pgto1);
+		Pagamento pgto2 = new PagamentoComCartao(null, EstadoPagamento.PENDENTE, ped2, 5);
+		ped2.setPagamento(pgto2);
+		Pagamento pgto3 = new PagamentoComBoleto(null, EstadoPagamento.CANCELADO, ped3, null, null);
+		ped3.setPagamento(pgto3);
+		
+		cli1.getPedidos().addAll(Arrays.asList(ped1, ped3));
+		cli3.getPedidos().addAll(Arrays.asList(ped2));
+		
+		pedidoRepository.saveAll(Arrays.asList(ped1, ped2, ped3));
+		pagamentoRepository.saveAll(Arrays.asList(pgto1,pgto2,pgto3));		
+		
 	}
 }
