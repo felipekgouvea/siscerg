@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.cerg.siscerg.entities.Categoria;
 import br.com.cerg.siscerg.repositories.CategoriaRepository;
+import br.com.cerg.siscerg.services.exceptions.ObjectNotFoundException;
 
 @Service
 public class CategoriaService {
@@ -15,9 +16,9 @@ public class CategoriaService {
 	private CategoriaRepository categoriaRepository;
 
 	public Categoria find(Integer id) {
-		System.out.println("Entrou aqui!!! Service");
 		Optional<Categoria> obj = categoriaRepository.findById(id);
-		return obj.orElse(null);
+		return obj.orElseThrow(() -> new ObjectNotFoundException(
+													"Objeto não encontrado! Id: " + id + ", Tipo: " + Categoria.class.getName() ));
 	}
 
 }
